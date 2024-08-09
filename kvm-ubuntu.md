@@ -124,7 +124,7 @@ virsh start ubuntu24.04
 
 ```bash
 export VM_NAME="ubuntu24.04"
-export SNAPSHOT_NAME="ubuntu24.04-after-install-1"
+export SNAPSHOT_NAME="ubuntu24.04-after-networkfix-1"
 # stop vm
 virsh shutdown ${VM_NAME}
 
@@ -160,4 +160,45 @@ export SNAPSHOT_NAME="ubuntu24.04-after-install-1"
 virsh shutdown --domain ${VM_NAME}
 # Resoore
 virsh snapshot-revert --domain ${VM_NAME} --snapshotname ${SNAPSHOT_NAME} --running
+```
+
+
+### Clone vm
+
+```bash
+# Get source disk file name
+sudo virsh dumpxml ubuntu24.04 | grep '<source file='
+
+# copy disk
+sudo cp /var/lib/libvirt/images/ubuntu24.04.qcow2 /var/lib/libvirt/images/k8s-lb1.qcow2
+
+# Save the source VM's XML configuration to a file
+sudo virsh dumpxml ubuntu24.04 > /tmp/ubuntu24.04.xml
+
+# Edit file
+sudo vim /tmp/ubuntu24.04.xml
+## 1. Change the <name> tag: Update it to the new VM’s name
+## 2. Change the <uuid>: You can generate a new UUID using the uuidgen command.
+## 3. Update the disk file path: Modify the path under the <disk> section to point to the new disk image.
+## 4. Update the MAC address: Make sure the MAC address in the <interface> section is unique. You can generate a new MAC address or remove the current one (a new one will be assigned automatically when the VM starts).
+
+# Define the New VM:
+sudo virsh define /tmp/ubuntu24.04.xml
+
+# Start the New VM:
+sudo virsh start k8s-lb1
+sudo virsh list --all
+
+# Update Hostname
+
+sudo virsh clone --original ubuntu24.04 --name k8s-lb1 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original <source-vm-name> --name <new-vm-name> --file /var/lib/libvirt/images/<new-vm-name>.qcow2
+
+sudo virsh clone --original ubuntu24.04 --name k8s-lb2 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-master1 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-master2 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-master3 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-worker1 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-worker2 --file /var/lib/libvirt/images/k8s-master1.qcow2
+sudo virsh clone --original ubuntu24.04 --name k8s-worker3 --file /var/lib/libvirt/images/k8s-master1.qcow2
 ```
