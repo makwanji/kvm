@@ -1,0 +1,7 @@
+---
+- name: Ping each vm
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ping eachvm
+      ping:

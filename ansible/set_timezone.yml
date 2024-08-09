@@ -1,0 +1,19 @@
+---
+- name: Set timezone by updating /etc/localtime
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure /etc/localtime points to the correct timezone [Singapore]
+      file:
+        src: "/usr/share/zoneinfo/Asia/Singapore"  # Change this to your desired timezone
+        dest: /etc/localtime
+        state: link
+
+    - name: Verify timezone
+      command: timedatectl
+      register: result
+
+    - name: Show current timezone setting
+      debug:
+        msg: "{{ result.stdout }}"
+

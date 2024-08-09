@@ -1,0 +1,25 @@
+---
+- name: Push SSH Key to VMs
+  hosts: all
+  become: yes
+  tasks:
+    - name: Ensure .ssh directory exists
+      file:
+        path: /home/{{ ansible_user }}/.ssh
+        state: directory
+        mode: 0700
+        owner: "{{ ansible_user }}"
+        group: "{{ ansible_user }}"
+
+    # - name: Push SSH public key
+    #   authorized_key:
+    #     user: "{{ ansible_user }}"
+    #     state: present
+    #     key: "{{ lookup('file', lookup('env','HOME') + '/.ssh/id_rsa.pub') }}"
+
+    # - name: Ensure correct permissions on authorized_keys file
+    #   file:
+    #     path: /home/{{ ansible_user }}/.ssh/authorized_keys
+    #     mode: 0600
+    #     owner: "{{ ansible_user }}"
+    #     group: "{{ ansible_user }}"
