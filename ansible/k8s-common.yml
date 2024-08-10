@@ -1,0 +1,75 @@
+---
+- name: Install Kubernetes on All Nodes
+  hosts: kubernetes
+  become: yes
+  tasks:
+    - name: Update and Upgrade Packages
+      apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install required packages
+      apt:
+        name:
+          - curl
+          - apt-transport-https
+          - ca-certificates
+          - gnupg2
+          - software-properties-common
+          - net-tools
+        state: present
+
+    - name: Disable swap immediately
+      command: swapoff -a
+
+    - name: Ensure swap is disabled on boot
+      lineinfile:
+        path: /etc/fstab
+        regexp: '^.*swap.*'
+        state: absent
+
+    - name: Remove existing swap partitions from the system
+      command: |
+        for swap_partition in $(lsblk -no NAME,TYPE | grep swap | awk '{print $1}'); do
+          umount /dev/${swap_partition}
+          swapoff /dev/${swap_partition}
+        done
+      ignore_errors: yes
+
+
+    - name: Set up the Docker stable repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu noble stable
+        state: present
+
+    - name: Add Kubernetes APT Repository
+      apt_repository:
+        repo: 'deb [signed-by=/etc/apt/keyrings/k8s.gpg] https://pkgs.k8s.io/core:/stable:/v1.30/deb/ /'
+        state: present
+        filename: k8s.list
+
+    - name: Install Kubernetes Components
+      apt:
+        name:
+          - kubelet
+          - kubeadm
+          - kubectl
+        state: present
+
+    - name: Ensure Docker is Installed
+      apt:
+        name: docker.io
+        state: present
+
+    - name: Start and Enable Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add {{ ansible_user }} user to the Docker group
+      user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+

@@ -12,7 +12,7 @@ VMS=("k8s-lb1" "k8s-lb2" "k8s-master1" "k8s-master2" "k8s-master2" "k8s-worker1"
 # Function to take backup of a VM
 backup_vm() {
   VM_NAME=$1
-  SNAPSHOT_NAME="${VM_NAME}_${TIMESTAMP}"
+  SNAPSHOT_NAME="${VM_NAME}_after_k8s_${TIMESTAMP}"
 
   echo "Starting backup for $VM_NAME..." | tee -a $LOGFILE
 

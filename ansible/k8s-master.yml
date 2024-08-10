@@ -1,0 +1,35 @@
+- name: Initialize Kubernetes Master Node
+  hosts: k8s-master1
+  become: yes
+  tasks:
+    # - name: Initialize the Kubernetes Master
+    #   command: kubeadm init --pod-network-cidr=10.244.0.0/16
+    #   register: kubeadm_init
+    #   failed_when: kubeadm_init.rc != 0
+    #   changed_when: False
+
+    - name: Set up kubeconfig for the root user
+      command: "mkdir -p /root/.kube"
+      become: yes
+
+    - name: Copy Kubernetes admin config to root's kubeconfig
+      command: "cp -i /etc/kubernetes/admin.conf /root/.kube/config"
+      become: yes
+
+    # - name: Install Flannel Network Plugin
+    #   kubectl:
+    #     command: apply
+    #     kubeconfig: /root/.kube/config
+    #     definition: https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+    # - name: Output the join command
+    #   debug:
+    #     msg: "{{ kubeadm_init.stdout_lines | select('match', '^kubeadm join') | list }}"
+
+# - name: Join Worker Nodes to Kubernetes Cluster
+#   hosts: workers
+#   become: yes
+#   tasks:
+#     - name: Join worker nodes to the Kubernetes cluster
+#       command: "{{ hostvars['master1']['kubeadm_join_command'] }}"
+#       # Note: Ensure you replace 'master1' with the actual name of your master node in your inventory

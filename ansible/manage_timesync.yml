@@ -1,0 +1,24 @@
+---
+- name: Ensure systemd-timesyncd is installed and running
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package cache
+      apt:
+        update_cache: yes
+
+    - name: Install systemd-timesyncd
+      apt:
+        name: systemd-timesyncd
+        state: present
+
+    - name: Ensure systemd-timesyncd service is started and enabled
+      service:
+        name: systemd-timesyncd
+        state: started
+        enabled: yes
+
+    - name: Sync time with NTP servers
+      command: timedatectl set-ntp true
+      register: sync_result
+      changed_when: False

@@ -12,4 +12,10 @@ ansible-playbook ping.yml
 
 # 3. update timezone
 ansible-playbook set_timezone.yml
+
+# 4. NTP Server
+ansible-playbook manage_timesync.yml
+
+# 5. Install kuberneties
+ansible-playbook install_kubernetes.yml
 ```
